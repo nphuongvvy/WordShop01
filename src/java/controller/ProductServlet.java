@@ -49,9 +49,28 @@ public class ProductServlet extends HttpServlet {
             }
 
             request.setAttribute("categories", cDao.listAll());
-            request.setAttribute("list", dao.listAll());
 
-            // List images from sanPham directory
+            String query = request.getParameter("txtSearch");
+            String typeParam = request.getParameter("type");
+
+            if (action.equals("detail")) {
+                String id = request.getParameter("id");
+                Product product = dao.getObjectById(id);
+                request.setAttribute("product", product);
+                request.getRequestDispatcher("detail.jsp").forward(request, response);
+                return;
+            } else if (query != null && !query.trim().isEmpty()) {
+                request.setAttribute("list", dao.listBySearch(query));
+                request.setAttribute("searchTerm", query);
+            } else if (typeParam != null && !typeParam.isEmpty()) {
+                int typeId = Integer.parseInt(typeParam);
+                request.setAttribute("list", dao.listByType(typeId));
+                request.setAttribute("selectedType", typeId);
+            } else {
+                request.setAttribute("list", dao.listAll());
+            }
+
+            // List images from sanPham directory for the admin forms
             String imagePath = request.getServletContext().getRealPath("/images/sanPham");
             java.io.File dir = new java.io.File(imagePath);
             String[] imageList = dir.list();

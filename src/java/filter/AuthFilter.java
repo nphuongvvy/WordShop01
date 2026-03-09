@@ -22,24 +22,38 @@ public class AuthFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         HttpSession session = req.getSession(false);
 
-        String loginURI = req.getContextPath() + "/login";
-        String loginJSP = req.getContextPath() + "/login.jsp";
+        String path = req.getRequestURI().substring(req.getContextPath().length());
 
-        boolean loggedIn = session != null && session.getAttribute("user") != null;
-        boolean loginRequest = req.getRequestURI().equals(loginURI) || req.getRequestURI().equals(loginJSP);
+        // Define public paths
+        boolean isPublicPage = path.equals("/") ||
+                path.startsWith("/home") ||
+                path.startsWith("/login") ||
+                path.startsWith("/register") ||
+                path.startsWith("/detail") ||
+                path.equals("/products") ||
+                path.startsWith("/images") ||
+                isStaticResource(req);
 
-        // Allow access to login page, login servlet, and static resources if any (none
-        // yet but good practice)
-        if (loggedIn || loginRequest || isStaticResource(req)) {
+        // Special check for products management (private)
+        if (path.equals("/products") && "manage".equals(req.getParameter("mode"))) {
+            isPublicPage = false;
+        }
+
+        boolean loggedIn = (session != null && session.getAttribute("user") != null);
+
+        if (isPublicPage || loggedIn) {
             chain.doFilter(request, response);
         } else {
-            res.sendRedirect(loginJSP);
+            res.sendRedirect(req.getContextPath() + "/login.jsp");
         }
     }
 
     private boolean isStaticResource(HttpServletRequest req) {
-        String path = req.getRequestURI();
-        return path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".png") || path.endsWith(".jpg");
+        String path = req.getRequestURI().toLowerCase();
+        return path.endsWith(".css") || path.endsWith(".js") ||
+                path.endsWith(".png") || path.endsWith(".jpg") ||
+                path.endsWith(".jpeg") || path.endsWith(".gif") ||
+                path.endsWith(".svg");
     }
 
     @Override

@@ -5,6 +5,10 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import model.Product;
+import model.dao.ProductDAO;
 import utilities.ConnectDB;
 
 @WebServlet(name = "HomeServlet", urlPatterns = { "/home" })
@@ -27,32 +31,43 @@ public class HomeServlet extends HttpServlet {
         int totalProducts = 0;
         int totalCategories = 0;
         int totalAccounts = 0;
-        try (Connection con = getDB(request).getConnection()) {
-            try (Statement st = con.createStatement();
-                    ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
-                if (rs.next()) {
-                    totalProducts = rs.getInt(1);
+        List<Product> products = new ArrayList<>();
+
+        try {
+            ConnectDB db = getDB(request);
+            ProductDAO productDAO = new ProductDAO(db);
+            products = productDAO.listAll();
+
+            try (Connection con = db.getConnection()) {
+                try (Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM products")) {
+                    if (rs.next()) {
+                        totalProducts = rs.getInt(1);
+                    }
                 }
-            }
-            try (Statement st = con.createStatement();
-                    ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM categories")) {
-                if (rs.next()) {
-                    totalCategories = rs.getInt(1);
+                try (Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM categories")) {
+                    if (rs.next()) {
+                        totalCategories = rs.getInt(1);
+                    }
                 }
-            }
-            try (Statement st = con.createStatement();
-                    ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM accounts")) {
-                if (rs.next()) {
-                    totalAccounts = rs.getInt(1);
+                try (Statement st = con.createStatement();
+                        ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM accounts")) {
+                    if (rs.next()) {
+                        totalAccounts = rs.getInt(1);
+                    }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("dbError", e.getMessage());
         }
+
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("totalCategories", totalCategories);
         request.setAttribute("totalAccounts", totalAccounts);
+        request.setAttribute("products", products);
+
         request.getRequestDispatcher("home.jsp").forward(request, response);
     }
 }

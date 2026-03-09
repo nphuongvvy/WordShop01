@@ -83,11 +83,37 @@ public class ProductDAO implements Accessible<Product> {
 
     @Override
     public List<Product> listAll() {
+        return listBySearch(null);
+    }
+
+    public List<Product> listBySearch(String query) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT * FROM products";
+        if (query != null && !query.trim().isEmpty()) {
+            sql += " WHERE productName LIKE ?";
+        }
         try (Connection con = getConnection();
-                Statement st = con.createStatement();
-                ResultSet rs = st.executeQuery(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            if (query != null && !query.trim().isEmpty()) {
+                ps.setString(1, "%" + query + "%");
+            }
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(mapProduct(rs, con));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Product> listByType(int typeId) {
+        List<Product> list = new ArrayList<>();
+        String sql = "SELECT * FROM products WHERE typeId = ?";
+        try (Connection con = getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, typeId);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(mapProduct(rs, con));
             }

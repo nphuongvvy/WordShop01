@@ -1,7 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="model.Account"%>
+<%@page import="model.Product"%>
+<%@page import="java.util.List"%>
 <%
     Account currentUser = (Account) session.getAttribute("user");
+    List<Product> products = (List<Product>) request.getAttribute("products");
     Integer totalProducts = (Integer) request.getAttribute("totalProducts");
     Integer totalCategories = (Integer) request.getAttribute("totalCategories");
     Integer totalAccounts = (Integer) request.getAttribute("totalAccounts");
@@ -11,266 +14,217 @@
     if (totalAccounts == null) totalAccounts = 0;
 %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Home - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique. - Modern Lifestyle Collection</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Bootstrap 3.4.1 (Existing) -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     
     <style>
         :root {
-            
-            --soft-red: #FF8A8A;
-            --creamy-beige: #F4DEB3;
-            --pale-yellow: #F0EAAC;
-            --mint-green: #CCE0AC;
-            
-            --bg-color: #ffffff;
-            --text-main: #333333;
-            --text-muted: #666666;
-            --border-color: #f1f1f1;
-            --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            --primary: #2d3436;
+            --accent: #00b894;
+            --accent-soft: rgba(0, 184, 148, 0.1);
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --border-soft: #edf2f7;
+            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.05);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
             color: var(--text-main);
-            margin-bottom: 50px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .dashboard-header {
-            background: #ffffff;
-            padding: 85px 0 45px;
-            color: var(--text-main);
-            margin-bottom: 50px;
+        h1, h2, h3, h4, .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        /* --- Hero Section --- */
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            margin-bottom: 80px;
             position: relative;
         }
 
-        .welcome-msg {
-            font-size: 3.4rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -1px;
-            color: #333;
+        .hero-content h1 { font-size: 6rem; text-transform: uppercase; letter-spacing: 5px; margin-bottom: 20px; }
+        .hero-content p { font-size: 1.8rem; font-weight: 300; max-width: 600px; margin: 0 auto 40px; }
+        .btn-premium {
+            padding: 15px 40px;
+            background: white;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 50px;
+            text-decoration: none !important;
+            transition: all 0.3s;
+            display: inline-block;
         }
+        .btn-premium:hover { background: var(--accent); color: white; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 
-        .header-subtext {
-            font-size: 1.4rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
+        /* --- Modern Stats for Admins --- */
+        .admin-dashboard-lite { background: white; padding: 40px; border-radius: 20px; box-shadow: var(--shadow-md); margin-bottom: 80px; }
+        .stat-item { text-align: center; border-right: 1px solid var(--border-soft); }
+        .stat-item:last-child { border-right: none; }
+        .stat-value { font-size: 3.5rem; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 1.2rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); }
 
-        .card-stat {
-            background: #fff;
-            border: 1px solid var(--border-color);
+        /* --- Sections --- */
+        .section-title-wrap { margin-bottom: 50px; text-align: center; }
+        .section-line { width: 50px; height: 3px; background: var(--accent); margin: 20px auto; }
+
+        /* --- Featured Mini Card --- */
+        .featured-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; margin-bottom: 80px; }
+        .featured-card {
+            background: white;
             border-radius: 20px;
-            padding: 40px 25px;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .card-stat:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.06);
-        }
-
-        .icon-box {
-            width: 75px;
-            height: 75px;
-            line-height: 75px;
-            border-radius: 22px;
-            margin: 0 auto 25px;
-            font-size: 30px;
-            background: #fdfdfd;
-            transition: all 0.3s;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-       
-        .card-categories { background: #fffcfc; border: 1px solid var(--border-color); }
-        .card-products { background: #fafffa; border: 1px solid var(--border-color); }
-        .card-users { background: #fffdfa; border: 1px solid var(--border-color); }
-
-        .card-categories .icon-box { color: var(--soft-red); background: #fff5f5; }
-        .card-products .icon-box { color: #84a260; background: #f4f8f0; }
-        .card-users .icon-box { color: #d1b681; background: #faf8f0; }
-
-        .card-stat:hover .icon-box {
-            transform: scale(1.1) rotate(3deg);
-            color: white;
-        }
-
-        .card-categories:hover .icon-box { background: var(--soft-red); }
-        .card-products:hover .icon-box { background: var(--mint-green); }
-        .card-users:hover .icon-box { background: var(--creamy-beige); }
-
-        .card-stat .value {
-            font-size: 4rem;
-            font-weight: 800;
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .card-stat .label {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 700;
-        }
-
-        .btn-action {
-            border-radius: 12px;
-            padding: 12px 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-            margin-top: 30px;
-            transition: all 0.3s;
-            border: none;
-            color: white;
-        }
-
-        .card-categories .btn-action { background: var(--soft-red); }
-        .card-products .btn-action { background: #84a260; }
-        .card-users .btn-action { background: #d1b681; }
-
-        .btn-action:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            color: white;
-        }
-
-        .shortcut-container {
-            background: #fff;
-            padding: 45px;
-            border-radius: 24px;
-            margin-top: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-        }
-
-        .shortcut-title {
-            font-weight: 800;
-            color: #333;
-            margin-bottom: 35px;
+            padding: 20px;
+            transition: all 0.4s;
+            border: 1px solid var(--border-soft);
+            text-decoration: none !important;
+            color: inherit;
             display: flex;
             align-items: center;
-            font-size: 2.22rem;
         }
+        .featured-card:hover { transform: scale(1.05); box-shadow: var(--shadow-md); }
+        .featured-card i { font-size: 2.5rem; color: var(--accent); margin-right: 20px; background: var(--bg-body); padding: 15px; border-radius: 12px; }
 
-        .shortcut-title i { 
-            margin-right: 15px; 
-            color: var(--soft-red);
-            background: #fff5f5;
-            padding: 12px;
-            border-radius: 14px;
-        }
+        /* Animations */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        .hero-content { animation: slideUp 1s ease forwards; }
 
-        .btn-quick {
-            border-radius: 14px;
-            padding: 16px 32px;
-            font-weight: 700;
-            margin-right: 15px;
-            margin-bottom: 20px;
-            border: none;
-            transition: all 0.3s;
-            color: white;
-        }
-
-        .btn-quick:nth-of-type(1) { background: var(--soft-red); }
-        .btn-quick:nth-of-type(2) { background: var(--mint-green); color: #555; }
-        .btn-quick:nth-of-type(3) { background: var(--creamy-beige); color: #775522; }
-
-        .btn-quick:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.08);
-            opacity: 0.95;
-        }
-
-        .alert-nature {
-            background: #fff;
-            border-radius: 16px;
-            border: 1px solid #fce7e7;
-            color: #e53e3e;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
     </style>
 </head>
 <body>
 
     <jsp:include page="navbar.jsp"/>
 
-    <div class="dashboard-header">
-        <div class="container">
-            <h1 class="welcome-msg">
-                Hello, <%= (currentUser != null) ? currentUser.getFirstName() : "Admin" %>!
-            </h1>
-            <p class="header-subtext">Welcome back to your Product Management Dashboard.</p>
-            
-            <% if (request.getAttribute("dbError") != null) { %>
-                <div class="alert alert-danger" style="margin-top: 30px; border-radius: 12px; border: none; background: rgba(255,255,255,0.2); color: white;">
-                    <i class="glyphicon glyphicon-exclamation-sign"></i>
-                    <strong>Connection Alert:</strong> <%= request.getAttribute("dbError") %>
-                </div>
-            <% } %>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h4 style="font-weight: 500; letter-spacing: 5px; margin-bottom: 10px;">CURATED LIFESTYLE</h4>
+            <h1>BOUTIQUE<span style="color: var(--accent);">.</span></h1>
+            <p>Elevate your everyday experience with our hand-picked collection of premium design and craftsmanship.</p>
+            <a href="products" class="btn-premium">Explore Collection</a>
         </div>
     </div>
 
     <div class="container">
-        <div class="row">
-            <!-- categories card -->
-            <div class="col-md-4">
-                <div class="card-stat card-categories">
-                    <div class="icon-box"><i class="glyphicon glyphicon-th-list"></i></div>
-                    <span class="value"><%= totalCategories %></span>
-                    <span class="label">Total Categories</span>
-                    <a href="category" class="btn btn-action btn-block">View List</a>
+        
+        <!-- Dashboard Stats (Admin Only) -->
+        <% if (currentUser != null && currentUser.getRoleInSystem() == 1) { %>
+            <div class="admin-dashboard-lite">
+                <div class="row">
+                    <div class="col-md-9">
+                        <h4 style="margin-bottom: 25px; font-weight: 700; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted)">Warehouse Analytics</h4>
+                        <div class="row">
+                            <div class="col-xs-4 stat-item">
+                                <div class="stat-value"><%= totalProducts %></div>
+                                <div class="stat-label">Stock Items</div>
+                            </div>
+                            <div class="col-xs-4 stat-item">
+                                <div class="stat-value"><%= totalCategories %></div>
+                                <div class="stat-label">Collections</div>
+                            </div>
+                            <div class="col-xs-4 stat-item">
+                                <div class="stat-value"><%= totalAccounts %></div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-right" style="padding-top: 40px; border-left: 1px solid var(--border-soft)">
+                        <a href="products?mode=manage" class="btn btn-block btn-modern" style="background: var(--primary); color: white; border-radius: 12px; padding: 15px;">
+                             Manage Inventory <i class="glyphicon glyphicon-arrow-right" style="font-size: 10px; margin-left: 10px;"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-            
-            <!-- products card -->
-            <div class="col-md-4">
-                <div class="card-stat card-products">
-                    <div class="icon-box"><i class="glyphicon glyphicon-shopping-cart"></i></div>
-                    <span class="value"><%= totalProducts %></span>
-                    <span class="label">Total Products</span>
-                    <a href="products" class="btn btn-action btn-block">View Inventory</a>
+        <% } %>
+
+        <!-- Featured Highlights -->
+        <div class="section-title-wrap">
+            <h2 style="font-size: 3rem;">Why Choose BOUTIQUE.</h2>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="featured-grid">
+            <div class="featured-card">
+                <i class="glyphicon glyphicon-certificate"></i>
+                <div>
+                    <h4 style="margin-bottom: 5px; font-weight: 700;">Premium Quality</h4>
+                    <span style="color: var(--text-muted); font-size: 12px;">Only the finest materials used.</span>
                 </div>
             </div>
-            
-            <!-- users card -->
-            <div class="col-md-4">
-                <div class="card-stat card-users">
-                    <div class="icon-box"><i class="glyphicon glyphicon-user"></i></div>
-                    <span class="value"><%= totalAccounts %></span>
-                    <span class="label">Active Users</span>
-                    <a href="account" class="btn btn-action btn-block">Manage Team</a>
+            <div class="featured-card">
+                <i class="glyphicon glyphicon-send"></i>
+                <div>
+                    <h4 style="margin-bottom: 5px; font-weight: 700;">Fast Delivery</h4>
+                    <span style="color: var(--text-muted); font-size: 12px;">Worldwide shipping in 24h.</span>
+                </div>
+            </div>
+            <div class="featured-card">
+                <i class="glyphicon glyphicon-heart"></i>
+                <div>
+                    <h4 style="margin-bottom: 5px; font-weight: 700;">Luxury Design</h4>
+                    <span style="color: var(--text-muted); font-size: 12px;">Aesthetics meet functionality.</span>
                 </div>
             </div>
         </div>
 
-        <div class="shortcut-container">
-            <h3 class="shortcut-title"><i class="glyphicon glyphicon-flash"></i> Quick Utilities</h3>
-            <div class="row">
-                <div class="col-md-12">
-                    <a href="products?action=add" class="btn btn-quick"><i class="glyphicon glyphicon-plus"></i> New Product</a>
-                    <a href="category?action=add" class="btn btn-quick"><i class="glyphicon glyphicon-folder-close"></i> Create Category</a>
-                    <a href="account?action=add" class="btn btn-quick"><i class="glyphicon glyphicon-plus-sign"></i> Register User</a>
-                </div>
-            </div>
+        <!-- Latest Arrivals -->
+        <div class="section-title-wrap" style="margin-top: 50px;">
+            <h2 style="font-size: 2.5rem;">The Masterpieces</h2>
+            <p class="text-muted">A sneak peek of our newest additions</p>
+            <div class="section-line"></div>
         </div>
+
+        <!-- Re-use the card styles but slightly tweaked for home or just show more minimal grid -->
+        <div class="row">
+            <% if (products != null && !products.isEmpty()) { 
+                int limit = 0;
+                for (Product prod : products) { 
+                    if(limit++ >= 3) break; // Only show 3 on home
+            %>
+                <div class="col-md-4">
+                    <div style="background: white; border-radius: 24px; padding: 25px; border: 1px solid var(--border-soft); transition: all 0.3s; margin-bottom: 30px;">
+                        <img src="<%= request.getContextPath() + prod.getProductImage() %>" style="width: 100%; height: 250px; object-fit: contain; margin-bottom: 20px;">
+                        <span style="color: var(--accent); font-size: 10px; font-weight: 700; text-transform: uppercase;"><%= (prod.getType() != null) ? prod.getType().getCategoryName() : "Collection" %></span>
+                        <h4 style="margin: 10px 0; height: 1.4em; overflow: hidden;"><%= prod.getProductName() %></h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="font-size: 18px; color: var(--primary);">₫<%= String.format("%,d", prod.getPrice()) %></strong>
+                            <a href="products?action=detail&id=<%= prod.getProductId() %>" style="color: var(--primary); font-weight: 700; text-decoration: none;">VIEW <i class="glyphicon glyphicon-menu-right" style="font-size: 8px;"></i></a>
+                        </div>
+                    </div>
+                </div>
+            <% } } %>
+        </div>
+        
     </div>
+
+    <!-- Bootstrap/jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 </body>
 </html>
