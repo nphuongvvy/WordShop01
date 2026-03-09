@@ -30,13 +30,10 @@
         :root {
             --primary: #2d3436;
             --accent: #00b894;
-            --accent-soft: rgba(0, 184, 148, 0.1);
-            --bg-body: #f8fafc;
-            --card-bg: #ffffff;
+            --bg-body: #ffffff;
             --text-main: #2d3436;
             --text-muted: #636e72;
             --border-soft: #edf2f7;
-            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.05);
         }
 
         body {
